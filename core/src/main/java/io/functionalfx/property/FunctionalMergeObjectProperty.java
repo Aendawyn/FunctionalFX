@@ -26,20 +26,11 @@ package io.functionalfx.property;
 import javafx.beans.value.ObservableValue;
 
 import java.util.Collection;
-import java.util.function.Consumer;
 
 class FunctionalMergeObjectProperty<T> extends FunctionalObjectProperty<T> {
 
     public FunctionalMergeObjectProperty(Collection<? extends ObservableValue<? extends T>> observables) {
         super(observables);
-        Consumer<ObservableValue<? extends T>> action = property -> {
-            if (ObservableValues.hasValue(property)) {
-                set(property.getValue());
-            }
-        };
-        observables.forEach(p -> {
-            action.accept(p);
-            p.addListener((observable, oldValue, newValue) -> action.accept(p));
-        });
+        observables.forEach(p -> ObservableValues.addSafeValueListener(p, this::set));
     }
 }

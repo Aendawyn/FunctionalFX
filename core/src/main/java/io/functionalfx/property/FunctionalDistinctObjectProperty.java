@@ -34,15 +34,11 @@ class FunctionalDistinctObjectProperty<T> extends FunctionalObjectProperty<T> {
 
     public FunctionalDistinctObjectProperty(ObservableValue<T> parent) {
         super(parent);
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                if (!values.contains(parent.getValue())) {
-                    values.add(parent.getValue());
-                    set(parent.getValue());
-                }
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (!values.contains(newValue)) {
+                values.add(newValue);
+                set(newValue);
             }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        });
     }
 }

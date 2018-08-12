@@ -40,19 +40,13 @@ class FunctionalSwitchMapObjectProperty<R> extends FunctionalObjectProperty<R> {
 
     public <T> FunctionalSwitchMapObjectProperty(ObservableValue<T> parent, Function<T, ObservableValue<R>> mapper) {
         super(parent);
-
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                if (source != null) {
-                    source.removeListener(sourceListener);
-                }
-                source = mapper.apply(parent.getValue());
-                sourceAction.run();
-                source.addListener(sourceListener);
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (source != null) {
+                source.removeListener(sourceListener);
             }
-        };
-
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+            source = mapper.apply(newValue);
+            sourceAction.run();
+            source.addListener(sourceListener);
+        });
     }
 }

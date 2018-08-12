@@ -27,19 +27,11 @@ import io.functionalfx.lang.FunctionN;
 import javafx.beans.value.ObservableValue;
 
 import java.util.Collection;
-import java.util.List;
 
 class FunctionalCombineLatestObjectProperty<R, T> extends FunctionalObjectProperty<R> {
 
     public FunctionalCombineLatestObjectProperty(Collection<? extends ObservableValue<? extends T>> observables, FunctionN<R> combiner) {
         super(observables);
-        Runnable action = () -> {
-            if (ObservableValues.haveValues(observables)) {
-                List<Object> values = ObservableValues.getValues(observables);
-                set(combiner.apply(values));
-            }
-        };
-        action.run();
-        observables.forEach(p -> p.addListener((observable, oldValue, newValue) -> action.run()));
+        observables.forEach(p -> ObservableValues.addSafeValueListener(p, newValue -> set(combiner.apply(ObservableValues.getValues(observables)))));
     }
 }

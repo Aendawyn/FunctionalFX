@@ -31,12 +31,6 @@ class FunctionalMapObjectProperty<R> extends FunctionalObjectProperty<R> {
 
     public <T> FunctionalMapObjectProperty(ObservableValue<T> parent, Function<T, R> mapper) {
         super(parent);
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                set(mapper.apply(parent.getValue()));
-            }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        ObservableValues.addSafeValueListener(parent, newValue -> set(mapper.apply(newValue)));
     }
 }

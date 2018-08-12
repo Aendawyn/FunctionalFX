@@ -37,38 +37,30 @@ class FunctionalBufferObjectProperty<T> extends FunctionalObjectProperty<List<T>
     public FunctionalBufferObjectProperty(ObservableValue<T> parent, int count) {
         super(parent);
         buffer = new LinkedList<>();
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                buffer.add(parent.getValue());
-                if (buffer.size() == count) {
-                    set(buffer);
-                    buffer = new LinkedList<>();
-                }
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            buffer.add(newValue);
+            if (buffer.size() == count) {
+                set(buffer);
+                buffer = new LinkedList<>();
             }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        });
     }
 
     public FunctionalBufferObjectProperty(ObservableValue<T> parent, int count, int skip) {
         super(parent);
         buffers = new LinkedList<>();
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                if (valueCount % skip == 0) {
-                    buffers.add(new LinkedList<>());
-                }
-                valueCount++;
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (valueCount % skip == 0) {
+                buffers.add(new LinkedList<>());
+            }
+            valueCount++;
 
-                if (!buffers.isEmpty()) {
-                    buffers.forEach(buffer -> buffer.add(parent.getValue()));
-                    if (buffers.get(0).size() == count) {
-                        set(buffers.remove(0));
-                    }
+            if (!buffers.isEmpty()) {
+                buffers.forEach(buffer -> buffer.add(newValue));
+                if (buffers.get(0).size() == count) {
+                    set(buffers.remove(0));
                 }
             }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        });
     }
 }

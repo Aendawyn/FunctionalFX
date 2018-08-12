@@ -40,25 +40,20 @@ class FunctionalDebounceObjectProperty<T> extends FunctionalObjectProperty<T> {
         timeline = new Timeline();
         timeline.setCycleCount(1);
 
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                T value = parent.getValue();
-                if (isDebouncing) {
-                    timeline.stop();
-                }
-
-                timeline.getKeyFrames().clear();
-                timeline.getKeyFrames().add(new KeyFrame(Duration.millis(delay), event -> {
-                    timeline.stop();
-                    isDebouncing = false;
-                    set(value);
-                }));
-                isDebouncing = true;
-                timeline.play();
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (isDebouncing) {
+                timeline.stop();
             }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+
+            timeline.getKeyFrames().clear();
+            timeline.getKeyFrames().add(new KeyFrame(Duration.millis(delay), event -> {
+                timeline.stop();
+                isDebouncing = false;
+                set(newValue);
+            }));
+            isDebouncing = true;
+            timeline.play();
+        });
     }
 
 }

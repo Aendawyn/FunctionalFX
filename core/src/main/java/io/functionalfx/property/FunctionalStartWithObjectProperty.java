@@ -29,13 +29,7 @@ class FunctionalStartWithObjectProperty<T> extends FunctionalObjectProperty<T> {
 
     public FunctionalStartWithObjectProperty(ObservableValue<T> parent, T initialValue) {
         super(parent);
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                set(parent.getValue());
-            }
-        };
         set(initialValue);
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        ObservableValues.addSafeValueListener(parent, this::set);
     }
 }

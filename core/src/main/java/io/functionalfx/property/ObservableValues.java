@@ -26,6 +26,8 @@ import javafx.beans.value.ObservableValue;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 class ObservableValues {
@@ -34,18 +36,31 @@ class ObservableValues {
         throw new IllegalStateException("Cannot be instantiated");
     }
 
-    public static <T extends ObservableValue> boolean hasValue(T observableValue) {
-        return observableValue.getValue() != null;
+    public static <T> boolean isValidValue(T value) {
+        return Objects.nonNull(value);
     }
 
-    public static <T extends ObservableValue> boolean haveValues(Collection<T> observableValues) {
-        return observableValues.stream() //
-                .allMatch(ObservableValues::hasValue);
+    public static <T extends ObservableValue> boolean hasValue(T observableValue) {
+        return isValidValue(observableValue.getValue());
     }
 
     public static <T> List<T> getValues(Collection<? extends ObservableValue<? extends T>> observableValue) {
         return observableValue.stream() //
                 .map(ObservableValue::getValue) //
                 .collect(Collectors.toList());
+    }
+
+    public static <T> void addSafeValueListener(final ObservableValue<T> observable, final Consumer<T> onValueChanged) {
+        final Consumer<T> onSafeValueChanged = onSafeValueChanged(onValueChanged);
+        onSafeValueChanged.accept(observable.getValue());
+        observable.addListener((obs, oldValue, newValue) -> onSafeValueChanged.accept(newValue));
+    }
+
+    private static <T> Consumer<T> onSafeValueChanged(Consumer<T> onValueChanged) {
+        return newValue -> {
+            if (isValidValue(newValue)) {
+                onValueChanged.accept(newValue);
+            }
+        };
     }
 }

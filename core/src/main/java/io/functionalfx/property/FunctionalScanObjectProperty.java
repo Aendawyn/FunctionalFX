@@ -42,18 +42,14 @@ class FunctionalScanObjectProperty<T, R> extends FunctionalObjectProperty<R> {
     public FunctionalScanObjectProperty(ObservableValue<T> parent, R initialValue, BiFunction<R, T, R> accumulator) {
         super(parent);
         currentValue = initialValue;
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                if (NO_VALUE.equals(currentValue)) {
-                    currentValue = (R) parent.getValue();
-                    set(currentValue);
-                } else {
-                    currentValue = accumulator.apply(currentValue, parent.getValue());
-                    set(currentValue);
-                }
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (NO_VALUE.equals(currentValue)) {
+                currentValue = (R) newValue;
+                set(currentValue);
+            } else {
+                currentValue = accumulator.apply(currentValue, newValue);
+                set(currentValue);
             }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        });
     }
 }

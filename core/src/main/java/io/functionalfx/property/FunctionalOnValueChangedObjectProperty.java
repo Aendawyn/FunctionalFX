@@ -31,13 +31,9 @@ class FunctionalOnValueChangedObjectProperty<T> extends FunctionalObjectProperty
 
     public FunctionalOnValueChangedObjectProperty(ObservableValue<T> parent, Consumer<T> consumer) {
         super(parent);
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                consumer.accept(parent.getValue());
-                set(parent.getValue());
-            }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            consumer.accept(newValue);
+            set(newValue);
+        });
     }
 }

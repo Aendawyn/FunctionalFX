@@ -29,12 +29,6 @@ class FunctionalWrapperObjectProperty<T> extends FunctionalObjectProperty<T> {
 
     public FunctionalWrapperObjectProperty(ObservableValue<T> parent) {
         super(parent);
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent)) {
-                set(parent.getValue());
-            }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        ObservableValues.addSafeValueListener(parent, this::set);
     }
 }

@@ -31,12 +31,10 @@ class FunctionalFilterObjectProperty<T> extends FunctionalObjectProperty<T> {
 
     public FunctionalFilterObjectProperty(ObservableValue<T> parent, Predicate<T> predicate) {
         super(parent);
-        Runnable action = () -> {
-            if (ObservableValues.hasValue(parent) && predicate.test(getValue())) {
-                set(parent.getValue());
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (predicate.test(newValue)) {
+                set(newValue);
             }
-        };
-        action.run();
-        parent.addListener((observable, oldValue, newValue) -> action.run());
+        });
     }
 }
