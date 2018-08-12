@@ -24,9 +24,7 @@
 package io.functionalfx.lang;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
-@SuppressWarnings("unchecked")
 public interface FunctionN<R> {
 
     R apply(List<Object> parameters);
