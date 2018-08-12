@@ -23,36 +23,28 @@
 
 package io.functionalfx.property;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import io.functionalfx.lang.concurrent.Cancellable;
+import io.functionalfx.scheduler.JavaFXScheduler;
 import javafx.beans.value.ObservableValue;
-import javafx.util.Duration;
 
 import java.util.concurrent.TimeUnit;
 
 class FunctionalDebounceObjectProperty<T> extends FunctionalObjectProperty<T> {
 
-    private final Timeline timeline;
+    private Cancellable cancellable;
     private boolean isDebouncing = false;
 
     public FunctionalDebounceObjectProperty(ObservableValue<T> parent, long delayTime, TimeUnit timeUnit) {
-        long delay = Math.max(0, timeUnit.toMillis(delayTime));
-        timeline = new Timeline();
-        timeline.setCycleCount(1);
-
         ObservableValues.addSafeValueListener(parent, newValue -> {
-            if (isDebouncing) {
-                timeline.stop();
+            if (isDebouncing && cancellable != null) {
+                cancellable.cancel();
             }
 
-            timeline.getKeyFrames().clear();
-            timeline.getKeyFrames().add(new KeyFrame(Duration.millis(delay), event -> {
-                timeline.stop();
+            cancellable = JavaFXScheduler.getScheduler().schedule(() -> {
                 isDebouncing = false;
                 set(newValue);
-            }));
+            }, delayTime, timeUnit);
             isDebouncing = true;
-            timeline.play();
         });
     }
 

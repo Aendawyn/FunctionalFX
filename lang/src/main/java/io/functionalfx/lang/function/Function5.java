@@ -21,17 +21,10 @@
  *
  */
 
-package io.functionalfx.property;
+package io.functionalfx.lang.function;
 
-import io.functionalfx.lang.function.FunctionN;
-import javafx.beans.value.ObservableValue;
+public interface Function5<T1, T2, T3, T4, T5, R> {
 
-import java.util.Collection;
+    R apply(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5);
 
-class FunctionalCombineLatestObjectProperty<R, T> extends FunctionalObjectProperty<R> {
-
-    public FunctionalCombineLatestObjectProperty(Collection<? extends ObservableValue<? extends T>> observables, FunctionN<R> combiner) {
-        super(observables);
-        observables.forEach(p -> ObservableValues.addSafeValueListener(p, newValue -> set(combiner.apply(ObservableValues.getValues(observables)))));
-    }
 }

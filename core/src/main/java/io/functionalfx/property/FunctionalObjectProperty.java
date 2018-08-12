@@ -23,7 +23,7 @@
 
 package io.functionalfx.property;
 
-import io.functionalfx.lang.*;
+import io.functionalfx.lang.function.*;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.value.ObservableValue;
 

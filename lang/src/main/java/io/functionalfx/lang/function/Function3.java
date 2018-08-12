@@ -21,7 +21,7 @@
  *
  */
 
-package io.functionalfx.lang;
+package io.functionalfx.lang.function;
 
 public interface Function3<T1, T2, T3, R> {
 

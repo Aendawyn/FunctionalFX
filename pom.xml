@@ -12,6 +12,7 @@
 
     <modules>
         <module>lang</module>
+        <module>scheduler</module>
         <module>core</module>
     </modules>
 

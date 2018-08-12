@@ -20,11 +20,7 @@
  *  * limitations under the License.
  *
  */
-
-package io.functionalfx.lang;
-
-public interface Function4<T1, T2, T3, T4, R> {
-
-    R apply(T1 t1, T2 t2, T3 t3, T4 t4);
-
-}
+/**
+ * The io.functionalfx.lang.function package contains function type declarations like {@linkplain io.functionalfx.lang.function.FunctionN}.
+ */
+package io.functionalfx.lang.function;

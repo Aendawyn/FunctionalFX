@@ -20,7 +20,12 @@
  *  * limitations under the License.
  *
  */
-/**
- * The io.functionalfx.lang package contains function type declarations like {@linkplain io.functionalfx.lang.FunctionN}.
- */
-package io.functionalfx.lang;
+package io.functionalfx.lang.concurrent;
+
+public interface Cancellable {
+
+    boolean isCancelled();
+
+    void cancel();
+
+}

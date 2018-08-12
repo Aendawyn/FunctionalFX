@@ -20,7 +20,7 @@
  *  * limitations under the License.
  *
  */
-package io.functionalfx.lang;
+package io.functionalfx.lang.function;
 
 import java.util.List;
 import java.util.function.BiFunction;

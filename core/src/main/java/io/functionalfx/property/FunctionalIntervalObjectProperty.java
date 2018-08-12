@@ -23,25 +23,30 @@
 
 package io.functionalfx.property;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.util.Duration;
+import io.functionalfx.lang.concurrent.Cancellable;
+import io.functionalfx.scheduler.JavaFXScheduler;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 class FunctionalIntervalObjectProperty extends FunctionalObjectProperty<Long> {
 
-    private final Timeline timeline;
-    private long currentValue = 1;
+    private long nextValue = 1;
 
     public FunctionalIntervalObjectProperty(long delayTime, TimeUnit timeUnit) {
-        long delay = Math.max(0, timeUnit.toMillis(delayTime));
-
-        timeline = new Timeline(new KeyFrame(Duration.millis(delay), event -> set(currentValue++)));
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+        final WeakReference<FunctionalIntervalObjectProperty> reference = new WeakReference<>(this);
+        final AtomicReference<Cancellable> cancellableReference = new AtomicReference<>();
+        final Cancellable cancellable = JavaFXScheduler.getScheduler().schedulePeriodically(() -> {
+            final FunctionalIntervalObjectProperty property = reference.get();
+            if (property != null) {
+                property.set(property.nextValue++);
+            } else {
+                cancellableReference.get().cancel();
+                cancellableReference.set(null);
+            }
+        }, delayTime, timeUnit);
+        cancellableReference.set(cancellable);
     }
-
 
 }
