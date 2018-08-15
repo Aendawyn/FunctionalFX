@@ -23,44 +23,113 @@
 
 package io.functionalfx.property;
 
+import io.functionalfx.lang.concurrent.Cancellable;
+import io.functionalfx.scheduler.JavaFXScheduler;
 import javafx.beans.value.ObservableValue;
 
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 class FunctionalBufferObjectProperty<T> extends FunctionalObjectProperty<List<T>> {
 
-    private List<T> buffer;
-    private List<List<T>> buffers;
+    private BufferQueue<T> bufferQueue;
     private long valueCount;
 
     public FunctionalBufferObjectProperty(ObservableValue<T> parent, int count) {
-        super(parent);
-        buffer = new LinkedList<>();
-        ObservableValues.addSafeValueListener(parent, newValue -> {
-            buffer.add(newValue);
-            if (buffer.size() == count) {
-                set(buffer);
-                buffer = new LinkedList<>();
-            }
-        });
+        this(parent, count, count);
     }
 
     public FunctionalBufferObjectProperty(ObservableValue<T> parent, int count, int skip) {
         super(parent);
-        buffers = new LinkedList<>();
+        bufferQueue = new BufferQueue<>();
         ObservableValues.addSafeValueListener(parent, newValue -> {
             if (valueCount % skip == 0) {
-                buffers.add(new LinkedList<>());
+                bufferQueue.pushNewBuffer();
             }
             valueCount++;
 
-            if (!buffers.isEmpty()) {
-                buffers.forEach(buffer -> buffer.add(newValue));
-                if (buffers.get(0).size() == count) {
-                    set(buffers.remove(0));
-                }
+            if (bufferQueue.hasBuffers()) {
+                bufferQueue.addInAllBuffers(newValue);
+                bufferQueue.getFirstBuffer().ifPresent(buffer -> {
+                    if (buffer.size() == count) {
+                        set(bufferQueue.popFirstBuffer());
+                    }
+                });
             }
         });
+    }
+
+    public FunctionalBufferObjectProperty(ObservableValue<T> parent, long delayTime, TimeUnit timeUnit) {
+        super(parent);
+        bufferQueue = new BufferQueue<>();
+        bufferQueue.pushNewBuffer();
+
+        ObservableValues.addSafeValueListener(parent, newValue -> {
+            if (bufferQueue.hasBuffers()) {
+                bufferQueue.addInFirstBuffer(newValue);
+            }
+        });
+
+        final WeakReference<FunctionalBufferObjectProperty<T>> reference = new WeakReference<>(this);
+        final AtomicReference<Cancellable> cancellableReference = new AtomicReference<>();
+        cancellableReference.set(JavaFXScheduler.getScheduler().schedulePeriodically(() -> {
+            final FunctionalBufferObjectProperty<T> property = reference.get();
+            if (property != null) {
+                if (bufferQueue.hasBuffers()) {
+                    property.set(bufferQueue.popFirstBuffer());
+                    bufferQueue.pushNewBuffer();
+                }
+            } else {
+                cancellableReference.get().cancel();
+                cancellableReference.set(null);
+            }
+
+        }, delayTime, timeUnit));
+    }
+
+    private static class BufferQueue<T> {
+
+        private List<List<T>> buffers;
+
+        public BufferQueue() {
+            buffers = new LinkedList<>();
+        }
+
+        public void pushNewBuffer() {
+            buffers.add(new LinkedList<>());
+        }
+
+        public boolean hasBuffers() {
+            return !buffers.isEmpty();
+        }
+
+        public Optional<List<T>> getFirstBuffer() {
+            if (buffers.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(buffers.get(0));
+        }
+
+        public List<T> popFirstBuffer() {
+            if (buffers.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+            return buffers.remove(0);
+        }
+
+        public void addInFirstBuffer(T value) {
+            if (hasBuffers()) {
+                buffers.get(0).add(value);
+            }
+        }
+
+        public void addInAllBuffers(T value) {
+            buffers.forEach(buffer -> buffer.add(value));
+        }
     }
 }

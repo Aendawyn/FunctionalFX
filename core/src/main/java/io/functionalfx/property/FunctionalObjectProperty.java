@@ -182,6 +182,10 @@ public abstract class FunctionalObjectProperty<T> extends ObjectPropertyBase<T> 
         return new FunctionalBufferObjectProperty<>(this, count, skip);
     }
 
+    public FunctionalObjectProperty<List<T>> buffer(long delayTime, TimeUnit timeUnit) {
+        return new FunctionalBufferObjectProperty<>(this, delayTime, timeUnit);
+    }
+
     public Object getBean() {
         return null;
     }
