@@ -54,21 +54,32 @@ public class JavaFXScheduler {
     }
 
     private Cancellable schedule(Runnable action, long delayTime, TimeUnit timeUnit, int count) {
-        final long delayMs = Math.max(0, timeUnit.toMillis(delayTime));
-        final Timeline timeline = new Timeline();
-        final CancellableScheduledAction scheduledAction = new CancellableScheduledAction(action, timeline, count == INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(delayMs), e -> scheduledAction.run()));
-        timeline.setCycleCount(count);
-        timeline.play();
-        return scheduledAction;
+        final long delayMs = timeUnit.toMillis(delayTime);
+
+        if (delayMs < 0) {
+            throw new IllegalArgumentException("Cannot schedule an action using negative delay");
+        }
+
+        if (delayMs == 0) {
+            final ImmediateAction immediateAction = new ImmediateAction(action);
+            immediateAction.run();
+            return immediateAction;
+        } else {
+            final Timeline timeline = new Timeline();
+            final CancellableScheduledAction scheduledAction = new CancellableScheduledAction(action, timeline, count == INDEFINITE);
+            timeline.getKeyFrames().add(new KeyFrame(Duration.millis(delayMs), e -> scheduledAction.run()));
+            timeline.setCycleCount(count);
+            timeline.play();
+            return scheduledAction;
+        }
     }
 
-    static class CancellableScheduledAction implements Cancellable, Runnable {
+    private static class CancellableScheduledAction implements Cancellable, Runnable {
 
         private final boolean isPeriodic;
+        private Runnable action;
         private boolean isDone = false;
         private boolean isCancelled = false;
-        private Runnable action;
         private Timeline timeline;
 
         public CancellableScheduledAction(Runnable action, final Timeline timeline, boolean isPeriodic) {
@@ -100,11 +111,21 @@ public class JavaFXScheduler {
 
         private void dispose() {
             if (!isDone) {
-                timeline.stop();
+                if (timeline != null) {
+                    timeline.stop();
+                }
                 action = null;
                 timeline = null;
                 isDone = true;
             }
         }
+    }
+
+    private static class ImmediateAction extends CancellableScheduledAction {
+
+        public ImmediateAction(Runnable action) {
+            super(action, null, false);
+        }
+
     }
 }

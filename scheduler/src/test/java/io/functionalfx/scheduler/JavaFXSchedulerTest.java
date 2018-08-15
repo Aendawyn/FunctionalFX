@@ -42,6 +42,19 @@ public class JavaFXSchedulerTest {
     }
 
     @Test
+    public void testCannotScheduleWithNegativeDelay() {
+        Assertions.assertThatIllegalArgumentException().isThrownBy(() -> JavaFXScheduler.getScheduler().schedule(() -> {}, -5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testCanScheduleImmediately() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        JavaFXScheduler.getScheduler().schedule(latch::countDown, 0, TimeUnit.MILLISECONDS);
+
+        Assertions.assertThat(latch.await(10, TimeUnit.MILLISECONDS)).isTrue();
+    }
+
+    @Test
     public void runOnJavaFXApplicationThread() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicBoolean isJavaFXApplicationThread = new AtomicBoolean(false);
