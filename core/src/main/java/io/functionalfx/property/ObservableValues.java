@@ -44,6 +44,10 @@ class ObservableValues {
         return isValidValue(observableValue.getValue());
     }
 
+    public static <T extends ObservableValue> boolean haveValues(Collection<T> observableValues) {
+        return observableValues.stream().allMatch(ObservableValues::hasValue);
+    }
+
     public static <T> List<T> getValues(Collection<? extends ObservableValue<? extends T>> observableValue) {
         return observableValue.stream() //
                 .map(ObservableValue::getValue) //

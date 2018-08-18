@@ -125,6 +125,42 @@ public abstract class FunctionalObjectProperty<T> extends ObjectPropertyBase<T> 
         return merge(Arrays.asList(o1, o2, o3, o4, o5, o6, o7, o8, o9));
     }
 
+    public <T, R> FunctionalObjectProperty<R> withLatestFrom(Collection<? extends ObservableValue<? extends T>> observables, FunctionN<R> combiner) {
+        return new FunctionalWithLatestFromObjectProperty<>(this, observables, combiner);
+    }
+
+    public <T1, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, BiFunction<T, T1, R> combiner) {
+        return withLatestFrom(Collections.singletonList(o1), Functions.from(combiner));
+    }
+
+    public <T1, T2, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, Function3<T, T1, T2, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2), Functions.from(combiner));
+    }
+
+    public <T1, T2, T3, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, ObservableValue<T3> o3, Function4<T, T1, T2, T3, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2, o3), Functions.from(combiner));
+    }
+
+    public <T1, T2, T3, T4, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, ObservableValue<T3> o3, ObservableValue<T4> o4, Function5<T, T1, T2, T3, T4, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2, o3, o4), Functions.from(combiner));
+    }
+
+    public <T1, T2, T3, T4, T5, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, ObservableValue<T3> o3, ObservableValue<T4> o4, ObservableValue<T5> o5, Function6<T, T1, T2, T3, T4, T5, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2, o3, o4, o5), Functions.from(combiner));
+    }
+
+    public <T1, T2, T3, T4, T5, T6, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, ObservableValue<T3> o3, ObservableValue<T4> o4, ObservableValue<T5> o5, ObservableValue<T6> o6, Function7<T, T1, T2, T3, T4, T5, T6, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2, o3, o4, o5, o6), Functions.from(combiner));
+    }
+
+    public <T1, T2, T3, T4, T5, T6, T7, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, ObservableValue<T3> o3, ObservableValue<T4> o4, ObservableValue<T5> o5, ObservableValue<T6> o6, ObservableValue<T7> o7, Function8<T, T1, T2, T3, T4, T5, T6, T7, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2, o3, o4, o5, o6, o7), Functions.from(combiner));
+    }
+
+    public <T1, T2, T3, T4, T5, T6, T7, T8, R> FunctionalObjectProperty<R> withLatestFrom(ObservableValue<T1> o1, ObservableValue<T2> o2, ObservableValue<T3> o3, ObservableValue<T4> o4, ObservableValue<T5> o5, ObservableValue<T6> o6, ObservableValue<T7> o7, ObservableValue<T8> o8, Function9<T, T1, T2, T3, T4, T5, T6, T7, T8, R> combiner) {
+        return withLatestFrom(Arrays.asList(o1, o2, o3, o4, o5, o6, o7, o8), Functions.from(combiner));
+    }
+
     public static <T> FunctionalObjectProperty<T> just(T value) {
         return new FunctionalJustObjectProperty<>(value);
     }
@@ -150,7 +186,7 @@ public abstract class FunctionalObjectProperty<T> extends ObjectPropertyBase<T> 
     }
 
     public <R> FunctionalObjectProperty<R> switchMap(Function<T, ObservableValue<R>> mapper) {
-        return new FunctionalSwitchMapObjectProperty<R>(this, mapper);
+        return new FunctionalSwitchMapObjectProperty<>(this, mapper);
     }
 
     public FunctionalObjectProperty<T> distinct() {
