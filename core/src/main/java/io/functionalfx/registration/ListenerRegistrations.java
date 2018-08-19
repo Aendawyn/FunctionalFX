@@ -20,7 +20,7 @@
  *  * limitations under the License.
  *
  */
-package io.functionalfx.regitsration;
+package io.functionalfx.registration;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;

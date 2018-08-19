@@ -20,8 +20,35 @@
  *  * limitations under the License.
  *
  */
-/**
- * The io.functionalfx.registration package contains types {@linkplain io.functionalfx.regitsration.ListenerRegistration},
- * {@linkplain io.functionalfx.regitsration.ListenerRegister} and {@linkplain io.functionalfx.regitsration.ListenerRegistrations} factory.
- */
-package io.functionalfx.regitsration;
+package io.functionalfx.registration;
+
+import javafx.beans.property.Property;
+
+class SingleBidirectionalBindingListenerRegistration<T> implements ListenerRegistration {
+
+    private Property<T> property1;
+    private Property<T> property2;
+    private boolean isUnregistered;
+
+    public SingleBidirectionalBindingListenerRegistration(Property<T> property1, Property<T> property2) {
+        this.property1 = property1;
+        this.property2 = property2;
+        this.isUnregistered = false;
+        this.property1.bindBidirectional(this.property2);
+    }
+
+    @Override
+    public boolean isUnregistered() {
+        return isUnregistered;
+    }
+
+    @Override
+    public void unregister() {
+        if (!isUnregistered) {
+            isUnregistered = true;
+            property1.unbindBidirectional(property2);
+            property1 = null;
+            property2 = null;
+        }
+    }
+}

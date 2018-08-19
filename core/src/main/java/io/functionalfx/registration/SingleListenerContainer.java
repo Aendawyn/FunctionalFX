@@ -20,25 +20,36 @@
  *  * limitations under the License.
  *
  */
-package io.functionalfx.regitsration;
+package io.functionalfx.registration;
 
-import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WritableValue;
-import javafx.collections.*;
 
-public interface ListenerRegister extends ListenerRegistration {
+class SingleChangeListenerRegistration<T> implements ListenerRegistration {
 
-    <T> ListenerRegistration registerListener(final ObservableValue<T> observableValue, final ChangeListener<T> listener);
+    private ObservableValue<T> observableValue;
+    private ChangeListener<T> changeListener;
+    private boolean isUnregistered;
 
-    <T> ListenerRegistration registerListener(final ObservableList<T> observableList, final ListChangeListener<T> listener);
+    public SingleChangeListenerRegistration(ObservableValue<T> observableValue, ChangeListener<T> listener) {
+        this.observableValue = observableValue;
+        this.changeListener = listener;
+        this.isUnregistered = false;
+        this.observableValue.addListener(listener);
+    }
 
-    <T> ListenerRegistration registerListener(final ObservableSet<T> observableSet, final SetChangeListener<T> listener);
+    @Override
+    public boolean isUnregistered() {
+        return isUnregistered;
+    }
 
-    <K, V> ListenerRegistration registerListener(final ObservableMap<K, V> observableMap, final MapChangeListener<K, V> listener);
-
-    <T> ListenerRegistration registerBinding(final WritableValue<T> writableValue, final ObservableValue<T> observableValue);
-
-    <T> ListenerRegistration registerBidirectionalBinding(final Property<T> property1, final Property<T> property2);
+    @Override
+    public void unregister() {
+        if (!isUnregistered) {
+            isUnregistered = true;
+            observableValue.removeListener(changeListener);
+            observableValue = null;
+            changeListener = null;
+        }
+    }
 }

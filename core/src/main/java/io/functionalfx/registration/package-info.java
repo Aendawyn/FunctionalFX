@@ -20,12 +20,8 @@
  *  * limitations under the License.
  *
  */
-package io.functionalfx.regitsration;
-
-public interface ListenerRegistration {
-
-    boolean isUnregistered();
-
-    void unregister();
-
-}
+/**
+ * The io.functionalfx.registration package contains types {@linkplain io.functionalfx.registration.ListenerRegistration},
+ * {@linkplain io.functionalfx.registration.ListenerRegister} and {@linkplain io.functionalfx.registration.ListenerRegistrations} factory.
+ */
+package io.functionalfx.registration;

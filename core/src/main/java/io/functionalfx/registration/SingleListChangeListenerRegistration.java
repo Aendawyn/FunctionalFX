@@ -20,7 +20,7 @@
  *  * limitations under the License.
  *
  */
-package io.functionalfx.regitsration;
+package io.functionalfx.registration;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;

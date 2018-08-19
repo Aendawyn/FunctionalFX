@@ -20,22 +20,25 @@
  *  * limitations under the License.
  *
  */
-package io.functionalfx.regitsration;
+package io.functionalfx.registration;
 
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableValue;
 
-class SingleMapChangeListenerRegistration<K, V> implements ListenerRegistration {
+class SingleBindingListenerRegistration<T> implements ListenerRegistration {
 
-    private ObservableMap<K, V> observableMap;
-    private MapChangeListener<K, V> changeListener;
+    private WritableValue<T> writableValue;
+    private ObservableValue<T> observableValue;
+    private ChangeListener<T> changeListener;
     private boolean isUnregistered;
 
-    public SingleMapChangeListenerRegistration(ObservableMap<K, V> observableMap, MapChangeListener<K, V> listener) {
-        this.observableMap = observableMap;
-        this.changeListener = listener;
+    public SingleBindingListenerRegistration(WritableValue<T> writableValue, ObservableValue<T> observableValue) {
+        this.writableValue = writableValue;
+        this.observableValue = observableValue;
+        this.changeListener = (observable, oldValue, newValue) -> this.writableValue.setValue(newValue);
         this.isUnregistered = false;
-        this.observableMap.addListener(listener);
+        this.observableValue.addListener(this.changeListener);
     }
 
     @Override
@@ -47,8 +50,9 @@ class SingleMapChangeListenerRegistration<K, V> implements ListenerRegistration 
     public void unregister() {
         if (!isUnregistered) {
             isUnregistered = true;
-            observableMap.removeListener(changeListener);
-            observableMap = null;
+            observableValue.removeListener(changeListener);
+            writableValue = null;
+            observableValue = null;
             changeListener = null;
         }
     }
